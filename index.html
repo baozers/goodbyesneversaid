@@ -107,7 +107,7 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpcXdjZmVnendvc3ZjcGRxYnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5MzYxNjAsImV4cCI6MjA3MDUxMjE2MH0.L8izdCi8lnVj8fOTB7rYkr65H3gGc6mXNwYivStIcvU';
 
   // Initialize Supabase client
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const messagesContainer = document.getElementById('messagesContainer');
   const form = document.getElementById('griefForm');
