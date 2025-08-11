@@ -95,11 +95,19 @@
 </main>
 
 <div class="footer">
-  Created with ❤️ using GitHub Pages and Google Sheets
+  Created with ❤️ using Supabase
 </div>
 
+<!-- Supabase JS library -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+
 <script>
-  const API_URL = 'https://script.google.com/macros/s/AKfycbyAeQPG-6cdQHsK__sLzlWjNpaRCZS3EaqdHiD-vMaptu8pY8w6KeHAvVnVr13biJcU/exec'; // <== Replace with your Apps Script URL
+  // Replace these with your Supabase project info
+  const SUPABASE_URL = 'https://xiqwcfegzwosvcpdqbto.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpcXdjZmVnendvc3ZjcGRxYnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5MzYxNjAsImV4cCI6MjA3MDUxMjE2MH0.L8izdCi8lnVj8fOTB7rYkr65H3gGc6mXNwYivStIcvU';
+
+  // Initialize Supabase client
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const messagesContainer = document.getElementById('messagesContainer');
   const form = document.getElementById('griefForm');
@@ -107,25 +115,28 @@
 
   async function loadMessages() {
     messagesContainer.innerHTML = '<p>Loading messages...</p>';
-    try {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error('Failed to load messages');
-      const data = await res.json();
-      if (!data.length) {
-        messagesContainer.innerHTML = '<p>No messages yet. Be the first to share.</p>';
-        return;
-      }
-      messagesContainer.innerHTML = '';
-      // Show latest messages first
-      data.reverse().forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'message-card';
-        div.textContent = item.message;
-        messagesContainer.appendChild(div);
-      });
-    } catch (e) {
-      messagesContainer.innerHTML = `<p style="color:red;">Error loading messages: ${e.message}</p>`;
+    const { data, error } = await supabase
+      .from('messages')
+      .select('message')
+      .order('inserted_at', { ascending: false });
+    
+    if (error) {
+      messagesContainer.innerHTML = `<p style="color:red;">Error loading messages: ${error.message}</p>`;
+      return;
     }
+
+    if (!data.length) {
+      messagesContainer.innerHTML = '<p>No messages yet. Be the first to share.</p>';
+      return;
+    }
+
+    messagesContainer.innerHTML = '';
+    data.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'message-card';
+      div.textContent = item.message;
+      messagesContainer.appendChild(div);
+    });
   }
 
   form.addEventListener('submit', async e => {
@@ -135,25 +146,19 @@
       alert('Please enter a message at least 5 characters long.');
       return;
     }
+
     form.querySelector('button').disabled = true;
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message })
-      });
-      const json = await res.json();
-      if (json.result === 'success') {
-        messageInput.value = '';
-        loadMessages();
-      } else {
-        alert('Failed to send message: ' + (json.error || 'Unknown error'));
-      }
-    } catch (err) {
-      alert('Error submitting message: ' + err.message);
-    } finally {
-      form.querySelector('button').disabled = false;
+    const { error } = await supabase
+      .from('messages')
+      .insert([{ message }]);
+
+    if (error) {
+      alert('Failed to send message: ' + error.message);
+    } else {
+      messageInput.value = '';
+      loadMessages();
     }
+    form.querySelector('button').disabled = false;
   });
 
   loadMessages();
@@ -161,4 +166,5 @@
 
 </body>
 </html>
+
 
