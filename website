@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Grief Wall</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f4f0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      background: #444;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      width: 100%;
+    }
+    form {
+      margin: 2rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      max-width: 400px;
+      width: 100%;
+    }
+    textarea, input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      background: #444;
+      color: white;
+      padding: 0.8rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #666;
+    }
+    .message-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+      max-width: 1200px;
+      width: 100%;
+    }
+    .message {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      white-space: pre-wrap;
+    }
+    .message small {
+      display: block;
+      margin-top: 0.5rem;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Grief Wall</h1>
+    <p>Share your unsent words for those you've lost</p>
+  </header>
+
+  <form id="griefForm">
+    <textarea id="message" placeholder="Write your message..." required></textarea>
+    <input id="name" placeholder="Your name (optional)"/>
+    <button type="submit">Post</button>
+  </form>
+
+  <section class="message-grid" id="messageGrid"></section>
+
+  <script>
+    // For demo purposes, we'll store in localStorage (works on GitHub Pages but not shareable globally)
+    const form = document.getElementById('griefForm');
+    const messageGrid = document.getElementById('messageGrid');
+
+    function loadMessages() {
+      const messages = JSON.parse(localStorage.getItem('griefMessages') || '[]');
+      messageGrid.innerHTML = '';
+      messages.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = 'message';
+        div.innerHTML = `
+          ${msg.text}
+          <small>${msg.name ? '— ' + msg.name : ''}</small>
+        `;
+        messageGrid.appendChild(div);
+      });
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const text = document.getElementById('message').value.trim();
+      const name = document.getElementById('name').value.trim();
+      if (!text) return;
+      const messages = JSON.parse(localStorage.getItem('griefMessages') || '[]');
+      messages.unshift({ text, name });
+      localStorage.setItem('griefMessages', JSON.stringify(messages));
+      form.reset();
+      loadMessages();
+    });
+
+    loadMessages();
+  </script>
+</body>
+</html>
