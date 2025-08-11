@@ -95,71 +95,37 @@
 </main>
 
 <div class="footer">
-  Created with ❤️ using GitHub Pages and GitHub Issues API
+  Created with ❤️ using GitHub Pages and Google Sheets
 </div>
 
 <script>
-  const repoOwner = 'baozers'; // <== Change this
-  const repoName = 'goodbyesneversaid'; // <== Change this
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzhmAUTZbj8ooha5FpY7J71xEAPEzrc1OwH7iCgQwK60GwaZj5Vw0YkSzxw3x5sLdDYHg/exec'; // <== Replace with your Apps Script URL
+
   const messagesContainer = document.getElementById('messagesContainer');
   const form = document.getElementById('griefForm');
   const messageInput = document.getElementById('messageInput');
-  const GITHUB_API = `https://api.github.com/repos/${repoOwner}/${repoName}/issues`;
 
-  // Fetch public issues from your repo and display as messages
   async function loadMessages() {
     messagesContainer.innerHTML = '<p>Loading messages...</p>';
     try {
-      const response = await fetch(`${GITHUB_API}?per_page=30&state=open&labels=grief-message`);
-      if (!response.ok) throw new Error('Failed to load messages');
-      const issues = await response.json();
-      if (issues.length === 0) {
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error('Failed to load messages');
+      const data = await res.json();
+      if (!data.length) {
         messagesContainer.innerHTML = '<p>No messages yet. Be the first to share.</p>';
         return;
       }
       messagesContainer.innerHTML = '';
-      issues.forEach(issue => {
+      // Show latest messages first
+      data.reverse().forEach(item => {
         const div = document.createElement('div');
         div.className = 'message-card';
-        // Show issue body only — no user info to keep anonymous
-        div.textContent = issue.body;
+        div.textContent = item.message;
         messagesContainer.appendChild(div);
       });
-    } catch (error) {
-      messagesContainer.innerHTML = `<p style="color:red;">Error loading messages: ${error.message}</p>`;
+    } catch (e) {
+      messagesContainer.innerHTML = `<p style="color:red;">Error loading messages: ${e.message}</p>`;
     }
-  }
-
-  // Submit a new grief message by creating a GitHub Issue via API
-  async function submitMessage(message) {
-    const url = `https://api.github.com/repos/${repoOwner}/${repoName}/issues`;
-    // We send anonymous issues using a GitHub personal access token, but since that exposes your token, instead:
-    // **Workaround:** Use GitHub's **anonymous issue creation** via the public API **does not exist**. 
-    // So this won't work without a backend or your token.
-    // But there is a hack: You can use a **GitHub Actions** workflow or a third-party proxy API.
-    // For demo, we will show how to do this with a **GitHub personal access token** (PAT) — **DO NOT publish your token publicly!**
-
-    alert('Due to GitHub API limitations, submitting messages directly from the browser requires a personal access token, which is not secure in client-side code.\n\nTo accept public anonymous submissions, you must use a backend or a third-party service.');
-
-    // This placeholder code shows how you would submit with token:
-    /*
-    const token = 'YOUR_PERSONAL_ACCESS_TOKEN'; // NEVER expose this in public code!
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': 'token ' + token,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        title: message.substring(0, 50) || 'New grief message',
-        body: message,
-        labels: ['grief-message']
-      })
-    });
-    if (!response.ok) throw new Error('Failed to submit message');
-    */
-
   }
 
   form.addEventListener('submit', async e => {
@@ -169,13 +135,20 @@
       alert('Please enter a message at least 5 characters long.');
       return;
     }
-    // Disable form while submitting
     form.querySelector('button').disabled = true;
-
     try {
-      await submitMessage(message);
-      alert('Message submission requires backend setup. See README.');
-      messageInput.value = '';
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
+      });
+      const json = await res.json();
+      if (json.result === 'success') {
+        messageInput.value = '';
+        loadMessages();
+      } else {
+        alert('Failed to send message: ' + (json.error || 'Unknown error'));
+      }
     } catch (err) {
       alert('Error submitting message: ' + err.message);
     } finally {
@@ -188,3 +161,4 @@
 
 </body>
 </html>
+
