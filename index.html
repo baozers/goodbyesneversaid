@@ -1,170 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Goodbyes never said</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goodbyes Never Said</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f9f4f3;
-    margin: 0; padding: 0;
-    display: flex; flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-  }
-  header {
-    background: #ab6c82;
-    color: white;
-    padding: 1.5rem;
-    text-align: center;
-    width: 100%;
-  }
-  main {
-    max-width: 700px;
-    width: 90%;
-    margin: 1.5rem auto 3rem;
-  }
-  form {
-    background: white;
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 3px 10px rgb(0 0 0 / 0.1);
-    margin-bottom: 2rem;
-  }
-  textarea {
-    width: 100%;
-    height: 90px;
-    resize: vertical;
-    padding: 0.5rem;
-    font-size: 1rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    margin-bottom: 1rem;
-  }
-  button {
-    background: #ab6c82;
-    color: white;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    font-size: 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  button:disabled {
-    background: #d6a5b8;
-    cursor: not-allowed;
-  }
-  .messages {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .message-card {
-    background: white;
-    padding: 1rem 1.3rem;
-    border-radius: 8px;
-    box-shadow: 0 1px 5px rgb(0 0 0 / 0.1);
-    white-space: pre-wrap;
-    font-size: 1.1rem;
-  }
-  .footer {
-    text-align: center;
-    color: #999;
-    margin-bottom: 2rem;
-    font-size: 0.9rem;
-  }
+  body { font-family: Arial, sans-serif; background: #fdf6e3; color: #333; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+  h1 { margin-bottom: 10px; }
+  form { margin-bottom: 20px; display: flex; flex-direction: column; width: 300px; }
+  input, textarea, button { margin-bottom: 10px; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 5px; }
+  .note { background: #fff9c4; padding: 15px; margin: 10px; border-radius: 8px; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); width: 300px; }
+  .recipient { font-weight: bold; margin-bottom: 5px; }
 </style>
 </head>
 <body>
+<h1>Goodbyes Never Said</h1>
 
-<header>
-  <h1>Anonymous Grief Wall</h1>
-  <p>Share your unsent words. Messages appear publicly and anonymously.</p>
-</header>
+<form id="messageForm">
+  <input type="text" id="recipient" placeholder="To (or leave blank for anonymous)">
+  <textarea id="content" placeholder="Write your message..." rows="4" required></textarea>
+  <button type="submit">Send</button>
+</form>
 
-<main>
-  <form id="griefForm">
-    <textarea id="messageInput" placeholder="Write your message here..." required minlength="5"></textarea>
-    <button type="submit">Send Message</button>
-  </form>
+<div id="notes"></div>
 
-  <section class="messages" id="messagesContainer">
-    <p>Loading messages...</p>
-  </section>
-</main>
-
-<div class="footer">
-  Created with ❤️ using Supabase
-</div>
-
-<!-- Supabase JS library -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js"></script>
 <script>
-  // Replace these with your Supabase project info
+  // ======== REPLACE WITH YOUR SUPABASE KEYS ========
   const SUPABASE_URL = 'https://xiqwcfegzwosvcpdqbto.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpcXdjZmVnendvc3ZjcGRxYnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5MzYxNjAsImV4cCI6MjA3MDUxMjE2MH0.L8izdCi8lnVj8fOTB7rYkr65H3gGc6mXNwYivStIcvU';
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // Initialize Supabase client
-  const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const form = document.getElementById('messageForm');
+  const notesDiv = document.getElementById('notes');
 
-  const messagesContainer = document.getElementById('messagesContainer');
-  const form = document.getElementById('griefForm');
-  const messageInput = document.getElementById('messageInput');
-
-  async function loadMessages() {
-    messagesContainer.innerHTML = '<p>Loading messages...</p>';
-    const { data, error } = await supabase
+  // Fetch and display messages
+  async function loadNotes() {
+    const { data: messages, error } = await supabase
       .from('messages')
-      .select('message')
-      .order('inserted_at', { ascending: false });
-    
-    if (error) {
-      messagesContainer.innerHTML = `<p style="color:red;">Error loading messages: ${error.message}</p>`;
-      return;
-    }
-
-    if (!data.length) {
-      messagesContainer.innerHTML = '<p>No messages yet. Be the first to share.</p>';
-      return;
-    }
-
-    messagesContainer.innerHTML = '';
-    data.forEach(item => {
+      .select('*')
+      .order('created_at', { ascending: false });
+    notesDiv.innerHTML = '';
+    messages.forEach(msg => {
       const div = document.createElement('div');
-      div.className = 'message-card';
-      div.textContent = item.message;
-      messagesContainer.appendChild(div);
+      div.className = 'note';
+      div.innerHTML = `<div class="recipient">${msg.recipient || 'Anonymous'}</div><div>${msg.content}</div>`;
+      notesDiv.appendChild(div);
     });
   }
 
-  form.addEventListener('submit', async e => {
+  // Handle new message submission
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const message = messageInput.value.trim();
-    if (!message || message.length < 5) {
-      alert('Please enter a message at least 5 characters long.');
-      return;
-    }
+    const recipient = document.getElementById('recipient').value;
+    const content = document.getElementById('content').value;
+    if (!content) return;
 
-    form.querySelector('button').disabled = true;
-    const { error } = await supabase
-      .from('messages')
-      .insert([{ message }]);
-
-    if (error) {
-      alert('Failed to send message: ' + error.message);
-    } else {
-      messageInput.value = '';
-      loadMessages();
-    }
-    form.querySelector('button').disabled = false;
+    await supabase.from('messages').insert([{ recipient, content }]);
+    form.reset();
+    loadNotes();
   });
 
-  loadMessages();
+  loadNotes();
 </script>
-
 </body>
 </html>
+
 
 
