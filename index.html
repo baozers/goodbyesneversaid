@@ -5,15 +5,80 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Goodbyes Never Said</title>
 <style>
-  body { font-family: Arial, sans-serif; background: #fdf6e3; color: #333; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-  h1 { margin-bottom: 10px; }
-  form { margin-bottom: 20px; display: flex; flex-direction: column; width: 300px; }
-  input, textarea, button { margin-bottom: 10px; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 5px; }
-  .note { background: #fff9c4; padding: 15px; margin: 10px; border-radius: 8px; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); width: 300px; }
-  .recipient { font-weight: bold; margin-bottom: 5px; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #fefbe9;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  h1 {
+    margin-bottom: 15px;
+    font-size: 2rem;
+  }
+
+  form {
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+  }
+
+  input, textarea, button {
+    margin-bottom: 10px;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  button {
+    background-color: #ffecb3;
+    border: 1px solid #e0c97f;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #ffe082;
+  }
+
+  #notes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .note {
+    background: #fff9c4;
+    padding: 15px;
+    margin: 10px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+    width: 200px;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    word-wrap: break-word;
+    transition: transform 0.2s;
+  }
+
+  .note:hover {
+    transform: rotate(-1deg);
+  }
+
+  .recipient {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+  }
 </style>
 </head>
 <body>
+
 <h1>Goodbyes Never Said</h1>
 
 <form id="messageForm">
@@ -26,7 +91,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js"></script>
 <script>
-  // ======== REPLACE WITH YOUR SUPABASE KEYS ========
+  // ======= REPLACE THESE WITH YOUR SUPABASE INFO =======
   const SUPABASE_URL = 'https://xiqwcfegzwosvcpdqbto.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpcXdjZmVnendvc3ZjcGRxYnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5MzYxNjAsImV4cCI6MjA3MDUxMjE2MH0.L8izdCi8lnVj8fOTB7rYkr65H3gGc6mXNwYivStIcvU';
   const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -40,6 +105,12 @@
       .from('messages')
       .select('*')
       .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error loading messages:', error);
+      return;
+    }
+
     notesDiv.innerHTML = '';
     messages.forEach(msg => {
       const div = document.createElement('div');
@@ -56,15 +127,18 @@
     const content = document.getElementById('content').value;
     if (!content) return;
 
-    await supabase.from('messages').insert([{ recipient, content }]);
+    const { data, error } = await supabase.from('messages').insert([{ recipient, content }]);
+    if (error) {
+      console.error('Error inserting message:', error);
+      alert('Failed to send message. Check console for details.');
+      return;
+    }
+
     form.reset();
-    loadNotes();
+    loadNotes(); // Refresh notes immediately
   });
 
   loadNotes();
 </script>
 </body>
 </html>
-
-
-
