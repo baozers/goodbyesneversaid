@@ -1,144 +1,514 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Goodbyes Never Said</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #fefbe9;
-    color: #333;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goodbyes Never Said</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Caveat:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  h1 {
-    margin-bottom: 15px;
-    font-size: 2rem;
-  }
+        body {
+            font-family: 'Kalam', cursive;
+            background: #f5f3f0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 183, 197, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(120, 200, 150, 0.3) 0%, transparent 50%);
+            min-height: 100vh;
+            color: #2c2c2c;
+            position: relative;
+        }
 
-  form {
-    margin-bottom: 30px;
-    display: flex;
-    flex-direction: column;
-    width: 320px;
-  }
+        /* Paper texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255,255,255,0.03) 2px,
+                    rgba(255,255,255,0.03) 4px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0,0,0,0.01) 2px,
+                    rgba(0,0,0,0.01) 4px
+                );
+            pointer-events: none;
+            z-index: 1;
+        }
 
-  input, textarea, button {
-    margin-bottom: 10px;
-    padding: 10px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            position: relative;
+            z-index: 2;
+        }
 
-  button {
-    background-color: #ffecb3;
-    border: 1px solid #e0c97f;
-    cursor: pointer;
-  }
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
 
-  button:hover {
-    background-color: #ffe082;
-  }
+        h1 {
+            font-family: 'Caveat', cursive;
+            font-size: 4rem;
+            font-weight: 700;
+            color: #2c2c2c;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            transform: rotate(-1deg);
+            display: inline-block;
+        }
 
-  #notes {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+        .subtitle {
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: #555;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+            transform: rotate(0.5deg);
+        }
 
-  .note {
-    background: #fff9c4;
-    padding: 15px;
-    margin: 10px;
-    border-radius: 10px;
-    box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
-    width: 200px;
-    min-height: 80px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    word-wrap: break-word;
-    transition: transform 0.2s;
-  }
+        .form-container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 40px;
+            margin: 40px auto;
+            max-width: 500px;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid #e0e0e0;
+            transform: rotate(-0.5deg);
+            position: relative;
+        }
 
-  .note:hover {
-    transform: rotate(-1deg);
-  }
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 20px;
+            background: #ddd;
+            border-radius: 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
-  .recipient {
-    font-weight: bold;
-    margin-bottom: 5px;
-    font-size: 0.9rem;
-  }
-</style>
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+            font-family: 'Caveat', cursive;
+            font-size: 1.2rem;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: 'Kalam', cursive;
+            background: #fefefe;
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #7b9bd1;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(123, 155, 209, 0.1);
+        }
+
+        textarea {
+            min-height: 100px;
+            line-height: 1.6;
+        }
+
+        .submit-btn {
+            background: #7b9bd1;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-family: 'Caveat', cursive;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 30px auto 0;
+            box-shadow: 0 4px 8px rgba(123, 155, 209, 0.3);
+            transform: rotate(1deg);
+        }
+
+        .submit-btn:hover {
+            background: #6a8bc4;
+            transform: rotate(1deg) translateY(-2px);
+            box-shadow: 0 6px 12px rgba(123, 155, 209, 0.4);
+        }
+
+        .messages-wall {
+            margin-top: 60px;
+            position: relative;
+        }
+
+        .wall-title {
+            text-align: center;
+            font-family: 'Caveat', cursive;
+            font-size: 2.5rem;
+            color: #555;
+            margin-bottom: 40px;
+            transform: rotate(-1deg);
+        }
+
+        .messages-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .post-it {
+            width: 200px;
+            min-height: 200px;
+            padding: 20px 15px 15px 15px;
+            font-family: 'Kalam', cursive;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #2c2c2c;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            word-wrap: break-word;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .post-it::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20px;
+            width: 40px;
+            height: 15px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .post-it::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 25px;
+            height: 25px;
+            background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.1) 50%);
+            border-radius: 0 4px 0 0;
+        }
+
+        .post-it:hover {
+            transform: rotate(0deg) scale(1.05);
+            z-index: 10;
+            box-shadow: 4px 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .post-it.yellow { 
+            background: linear-gradient(135deg, #fff740 0%, #ffeb3b 100%);
+            transform: rotate(-2deg);
+        }
+        .post-it.pink { 
+            background: linear-gradient(135deg, #ff8a95 0%, #ff7a8a 100%);
+            transform: rotate(1deg);
+        }
+        .post-it.blue { 
+            background: linear-gradient(135deg, #87ceeb 0%, #6bb6d6 100%);
+            transform: rotate(-1deg);
+        }
+        .post-it.green { 
+            background: linear-gradient(135deg, #98fb98 0%, #7dc67d 100%);
+            transform: rotate(2deg);
+        }
+        .post-it.orange { 
+            background: linear-gradient(135deg, #ffb347 0%, #ff9933 100%);
+            transform: rotate(-1.5deg);
+        }
+        .post-it.purple { 
+            background: linear-gradient(135deg, #dda0dd 0%, #c295c2 100%);
+            transform: rotate(0.5deg);
+        }
+        .post-it.lime { 
+            background: linear-gradient(135deg, #ccff90 0%, #b8e48f 100%);
+            transform: rotate(1.5deg);
+        }
+        .post-it.coral { 
+            background: linear-gradient(135deg, #ff7f7f 0%, #ff6b6b 100%);
+            transform: rotate(-0.8deg);
+        }
+
+        .post-it-to {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-family: 'Caveat', cursive;
+            font-size: 1.1rem;
+        }
+
+        .post-it-content {
+            margin-bottom: 15px;
+        }
+
+        .post-it-date {
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            font-size: 0.7rem;
+            opacity: 0.7;
+            font-family: 'Kalam', cursive;
+        }
+
+        .no-messages {
+            text-align: center;
+            color: #888;
+            font-size: 1.3rem;
+            margin-top: 50px;
+            font-family: 'Caveat', cursive;
+            transform: rotate(-1deg);
+        }
+
+        /* Scattered elements */
+        .scattered-element {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.6;
+            z-index: 0;
+        }
+
+        .heart-doodle {
+            font-size: 1.5rem;
+            color: #ff7a8a;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .star-doodle {
+            font-size: 1.2rem;
+            color: #ffb347;
+            animation: float 5s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+
+            .form-container {
+                padding: 30px 20px;
+                margin: 20px 10px;
+            }
+
+            .post-it {
+                width: 180px;
+                min-height: 180px;
+                padding: 18px 12px 12px 12px;
+            }
+
+            .messages-grid {
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .post-it {
+                width: 160px;
+                min-height: 160px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Scattered decorative elements -->
+    <div class="scattered-element heart-doodle" style="top: 15%; left: 10%;">💕</div>
+    <div class="scattered-element star-doodle" style="top: 25%; right: 15%;">⭐</div>
+    <div class="scattered-element heart-doodle" style="top: 60%; left: 5%;">💫</div>
+    <div class="scattered-element star-doodle" style="bottom: 20%; right: 8%;">✨</div>
+    <div class="scattered-element heart-doodle" style="bottom: 40%; left: 12%;">🌸</div>
 
-<h1>Goodbyes Never Said</h1>
+    <div class="container">
+        <header>
+            <h1>Goodbyes Never Said</h1>
+            <p class="subtitle">Share the words you wish you could have said. Write them on a virtual post-it note and add them to our collective wall of love and remembrance.</p>
+        </header>
 
-<form id="messageForm">
-  <input type="text" id="recipient" placeholder="To (or leave blank for anonymous)">
-  <textarea id="content" placeholder="Write your message..." rows="4" required></textarea>
-  <button type="submit">Send</button>
-</form>
+        <div class="form-container">
+            <form id="messageForm">
+                <div class="form-group">
+                    <label for="recipient">To:</label>
+                    <input type="text" id="recipient" placeholder="Mom, Dad, Sarah, my best friend..." required>
+                </div>
 
-<div id="notes"></div>
+                <div class="form-group">
+                    <label for="message">Your message:</label>
+                    <textarea id="message" placeholder="Dear..." required></textarea>
+                </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js"></script>
-<script>
-  // ======= REPLACE THESE WITH YOUR SUPABASE INFO =======
-  const SUPABASE_URL = 'https://xiqwcfegzwosvcpdqbto.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpcXdjZmVnendvc3ZjcGRxYnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5MzYxNjAsImV4cCI6MjA3MDUxMjE2MH0.L8izdCi8lnVj8fOTB7rYkr65H3gGc6mXNwYivStIcvU';
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                <button type="submit" class="submit-btn">Add to Wall</button>
+            </form>
+        </div>
 
-  const form = document.getElementById('messageForm');
-  const notesDiv = document.getElementById('notes');
+        <div class="messages-wall">
+            <h2 class="wall-title">Our Wall of Remembrance</h2>
+            <div class="messages-grid" id="messagesContainer">
+                <div class="no-messages">Post-it notes will appear here...</div>
+            </div>
+        </div>
+    </div>
 
-  // Fetch and display messages
-  async function loadNotes() {
-    const { data: messages, error } = await supabase
-      .from('messages')
-      .select('*')
-      .order('created_at', { ascending: false });
+    <script>
+        // In-memory storage for messages
+        let messages = [];
 
-    if (error) {
-      console.error('Error loading messages:', error);
-      return;
-    }
+        // Post-it colors
+        const colors = ['yellow', 'pink', 'blue', 'green', 'orange', 'purple', 'lime', 'coral'];
 
-    notesDiv.innerHTML = '';
-    messages.forEach(msg => {
-      const div = document.createElement('div');
-      div.className = 'note';
-      div.innerHTML = `<div class="recipient">${msg.recipient || 'Anonymous'}</div><div>${msg.content}</div>`;
-      notesDiv.appendChild(div);
-    });
-  }
+        // DOM elements
+        const form = document.getElementById('messageForm');
+        const messagesContainer = document.getElementById('messagesContainer');
 
-  // Handle new message submission
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const recipient = document.getElementById('recipient').value;
-    const content = document.getElementById('content').value;
-    if (!content) return;
+        // Form submission
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const recipient = document.getElementById('recipient').value.trim();
+            const messageText = document.getElementById('message').value.trim();
 
-    const { data, error } = await supabase.from('messages').insert([{ recipient, content }]);
-    if (error) {
-      console.error('Error inserting message:', error);
-      alert('Failed to send message. Check console for details.');
-      return;
-    }
+            if (!recipient || !messageText) return;
 
-    form.reset();
-    loadNotes(); // Refresh notes immediately
-  });
+            const newMessage = {
+                id: Date.now(),
+                to: recipient,
+                content: messageText,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                timestamp: new Date().toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric'
+                })
+            };
 
-  loadNotes();
-</script>
+            messages.unshift(newMessage);
+            form.reset();
+            renderMessages();
+            
+            // Add a gentle shake animation to the new post-it
+            setTimeout(() => {
+                const newPostIt = messagesContainer.querySelector('.post-it:first-child');
+                if (newPostIt) {
+                    newPostIt.style.animation = 'shake 0.5s ease-in-out';
+                }
+            }, 100);
+        });
+
+        // Render messages
+        function renderMessages() {
+            if (messages.length === 0) {
+                messagesContainer.innerHTML = '<div class="no-messages">Post-it notes will appear here...</div>';
+                return;
+            }
+
+            messagesContainer.innerHTML = messages.map(msg => `
+                <div class="post-it ${msg.color}">
+                    <div class="post-it-to">To ${msg.to}</div>
+                    <div class="post-it-content">${msg.content.replace(/\n/g, '<br>')}</div>
+                    <div class="post-it-date">${msg.timestamp}</div>
+                </div>
+            `).join('');
+        }
+
+        // Add sample messages for demonstration
+        setTimeout(() => {
+            const sampleMessages = [
+                {
+                    id: 1,
+                    to: "Grandma",
+                    content: "I miss your cookies and bedtime stories. I think about you every night before I sleep. Thank you for all the love.",
+                    color: "yellow",
+                    timestamp: "Sep 20"
+                },
+                {
+                    id: 2,
+                    to: "Charlie",
+                    content: "You were the best dog anyone could ask for. I'm sorry I couldn't save you. Run free at the rainbow bridge. 🐕",
+                    color: "blue",
+                    timestamp: "Sep 18"
+                },
+                {
+                    id: 3,
+                    to: "My friend Alex",
+                    content: "I wish we hadn't fought. I miss our late-night talks and terrible jokes. You meant the world to me.",
+                    color: "pink",
+                    timestamp: "Sep 15"
+                },
+                {
+                    id: 4,
+                    to: "Dad",
+                    content: "I finally got that promotion you always believed I'd get. I wore your lucky tie to the interview. Miss you every day.",
+                    color: "green",
+                    timestamp: "Sep 12"
+                },
+                {
+                    id: 5,
+                    to: "Little sister",
+                    content: "I should have been a better big brother. I'm sorry for all the times I was mean. I love you so much.",
+                    color: "orange",
+                    timestamp: "Sep 10"
+                }
+            ];
+
+            messages = [...sampleMessages, ...messages];
+            renderMessages();
+        }, 1500);
+
+        // Add shake animation keyframes dynamically
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: rotate(var(--rotation, 0deg)) translateX(0); }
+                25% { transform: rotate(var(--rotation, 0deg)) translateX(-2px); }
+                75% { transform: rotate(var(--rotation, 0deg)) translateX(2px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
