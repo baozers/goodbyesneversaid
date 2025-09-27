@@ -113,6 +113,48 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
+        .color-picker {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .color-option {
+            width: 35px;
+            height: 35px;
+            border-radius: 6px;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .color-option:hover {
+            transform: scale(1.1) rotate(2deg);
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.2);
+        }
+
+        .color-option.selected {
+            border-color: #333;
+            transform: scale(1.1) rotate(-2deg);
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.25);
+        }
+
+        .color-option.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #333;
+            font-weight: bold;
+            font-size: 16px;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+        }
+
         .form-group {
             margin-bottom: 25px;
         }
@@ -383,12 +425,25 @@
                     <textarea id="message" placeholder="Dear..." required></textarea>
                 </div>
 
+                <div class="form-group">
+                    <label>Choose your post-it color:</label>
+                    <div class="color-picker">
+                        <div class="color-option selected" data-color="yellow" style="background: linear-gradient(135deg, #fff740 0%, #ffeb3b 100%);"></div>
+                        <div class="color-option" data-color="pink" style="background: linear-gradient(135deg, #ff8a95 0%, #ff7a8a 100%);"></div>
+                        <div class="color-option" data-color="blue" style="background: linear-gradient(135deg, #87ceeb 0%, #6bb6d6 100%);"></div>
+                        <div class="color-option" data-color="green" style="background: linear-gradient(135deg, #98fb98 0%, #7dc67d 100%);"></div>
+                        <div class="color-option" data-color="orange" style="background: linear-gradient(135deg, #ffb347 0%, #ff9933 100%);"></div>
+                        <div class="color-option" data-color="purple" style="background: linear-gradient(135deg, #dda0dd 0%, #c295c2 100%);"></div>
+                        <div class="color-option" data-color="lime" style="background: linear-gradient(135deg, #ccff90 0%, #b8e48f 100%);"></div>
+                        <div class="color-option" data-color="coral" style="background: linear-gradient(135deg, #ff7f7f 0%, #ff6b6b 100%);"></div>
+                    </div>
+                </div>
+
                 <button type="submit" class="submit-btn">Add to Wall</button>
             </form>
         </div>
 
         <div class="messages-wall">
-            <h2 class="wall-title">Our Wall of Remembrance</h2>
             <div class="messages-grid" id="messagesContainer">
                 <div class="no-messages">Post-it notes will appear here...</div>
             </div>
@@ -398,8 +453,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js"></script>
     <script>
         // 🔥 REPLACE THESE WITH YOUR SUPABASE DETAILS
-        const SUPABASE_URL = 'https://vnsgnumlskjrcyvmxcxo.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZuc2dudW1sc2tqcmN5dm14Y3hvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NDkyNjksImV4cCI6MjA3NDUyNTI2OX0.nt1V7CH8sgiFklR4WGFI_nZbSIAtdW7uxSDtdes39v0';
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
         
         // Initialize Supabase client
         const { createClient } = window.supabase;
@@ -407,10 +462,24 @@
 
         // Post-it colors
         const colors = ['yellow', 'pink', 'blue', 'green', 'orange', 'purple', 'lime', 'coral'];
+        let selectedColor = 'yellow'; // Default selected color
 
         // DOM elements
         const form = document.getElementById('messageForm');
         const messagesContainer = document.getElementById('messagesContainer');
+        const colorOptions = document.querySelectorAll('.color-option');
+
+        // Color selection handler
+        colorOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // Remove selected class from all options
+                colorOptions.forEach(opt => opt.classList.remove('selected'));
+                // Add selected class to clicked option
+                option.classList.add('selected');
+                // Update selected color
+                selectedColor = option.dataset.color;
+            });
+        });
 
         // Show error messages
         function showError(message) {
@@ -421,6 +490,10 @@
         // Load messages from database
         async function loadMessages() {
             try {
+                console.log('🔄 Loading messages...');
+                console.log('🔗 Supabase URL:', SUPABASE_URL);
+                console.log('🔑 Supabase Key (first 20 chars):', SUPABASE_ANON_KEY.substring(0, 20) + '...');
+                
                 messagesContainer.innerHTML = '<div class="no-messages">Loading messages...</div>';
                 
                 const { data: messages, error } = await supabase
@@ -428,14 +501,19 @@
                     .select('*')
                     .order('created_at', { ascending: false });
 
+                console.log('📥 Raw response:', { data: messages, error });
+
                 if (error) {
+                    console.error('❌ Database error:', error);
                     throw error;
                 }
 
+                console.log('✅ Successfully loaded', messages?.length || 0, 'messages');
                 renderMessages(messages || []);
             } catch (error) {
+                console.error('💥 Load messages failed:', error);
                 showError('Failed to load messages: ' + error.message);
-                messagesContainer.innerHTML = '<div class="no-messages">Failed to load messages. Please refresh the page.</div>';
+                messagesContainer.innerHTML = '<div class="no-messages">Failed to load messages. Check console for details.</div>';
             }
         }
 
@@ -457,7 +535,7 @@
                 const { data, error } = await supabase
                     .from('messages')
                     .insert([{
-                        recipient: recipient,
+                        recipient: recipient || null, // Let database handle default
                         content: messageText,
                         color: colors[Math.floor(Math.random() * colors.length)]
                     }]);
@@ -467,6 +545,10 @@
                 }
 
                 form.reset();
+                // Reset color selection to yellow (first option)
+                colorOptions.forEach(opt => opt.classList.remove('selected'));
+                colorOptions[0].classList.add('selected');
+                selectedColor = 'yellow';
                 loadMessages(); // Refresh messages
 
             } catch (error) {
