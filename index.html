@@ -395,9 +395,15 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js"></script>
     <script>
-        // In-memory storage for messages
-        let messages = [];
+        // 🔥 REPLACE THESE WITH YOUR SUPABASE DETAILS
+        const SUPABASE_URL = 'https://vnsgnumlskjrcyvmxcxo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZuc2dudW1sc2tqcmN5dm14Y3hvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NDkyNjksImV4cCI6MjA3NDUyNTI2OX0.nt1V7CH8sgiFklR4WGFI_nZbSIAtdW7uxSDtdes39v0';
+        
+        // Initialize Supabase client
+        const { createClient } = window.supabase;
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Post-it colors
         const colors = ['yellow', 'pink', 'blue', 'green', 'orange', 'purple', 'lime', 'coral'];
@@ -406,98 +412,101 @@
         const form = document.getElementById('messageForm');
         const messagesContainer = document.getElementById('messagesContainer');
 
+        // Show error messages
+        function showError(message) {
+            console.error('Error:', message);
+            alert('Something went wrong: ' + message);
+        }
+
+        // Load messages from database
+        async function loadMessages() {
+            try {
+                messagesContainer.innerHTML = '<div class="no-messages">Loading messages...</div>';
+                
+                const { data: messages, error } = await supabase
+                    .from('messages')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    throw error;
+                }
+
+                renderMessages(messages || []);
+            } catch (error) {
+                showError('Failed to load messages: ' + error.message);
+                messagesContainer.innerHTML = '<div class="no-messages">Failed to load messages. Please refresh the page.</div>';
+            }
+        }
+
         // Form submission
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const recipient = document.getElementById('recipient').value.trim();
             const messageText = document.getElementById('message').value.trim();
+            const submitBtn = form.querySelector('button');
 
             if (!recipient || !messageText) return;
 
-            const newMessage = {
-                id: Date.now(),
-                to: recipient,
-                content: messageText,
-                color: colors[Math.floor(Math.random() * colors.length)],
-                timestamp: new Date().toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric'
-                })
-            };
+            try {
+                // Disable submit button
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sending...';
 
-            messages.unshift(newMessage);
-            form.reset();
-            renderMessages();
-            
-            // Add a gentle shake animation to the new post-it
+                const { data, error } = await supabase
+                    .from('messages')
+                    .insert([{
+                        recipient: recipient,
+                        content: messageText,
+                        color: colors[Math.floor(Math.random() * colors.length)]
+                    }]);
+
+                if (error) {
+                    throw error;
+                }
+
+                form.reset();
+                loadMessages(); // Refresh messages
+
+            } catch (error) {
+                showError('Failed to send message: ' + error.message);
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add to Wall';
+            }
+        });
+
+        // Render messages
+        function renderMessages(messages) {
+            if (messages.length === 0) {
+                messagesContainer.innerHTML = '<div class="no-messages">No messages yet. Be the first to share!</div>';
+                return;
+            }
+
+            messagesContainer.innerHTML = messages.map(msg => `
+                <div class="post-it ${msg.color}">
+                    <div class="post-it-to">To ${msg.recipient}</div>
+                    <div class="post-it-content">${msg.content.replace(/\n/g, '<br>')}</div>
+                    <div class="post-it-date">${new Date(msg.created_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
+                    })}</div>
+                </div>
+            `).join('');
+
+            // Add shake animation to newest post-it
             setTimeout(() => {
                 const newPostIt = messagesContainer.querySelector('.post-it:first-child');
                 if (newPostIt) {
                     newPostIt.style.animation = 'shake 0.5s ease-in-out';
                 }
             }, 100);
-        });
-
-        // Render messages
-        function renderMessages() {
-            if (messages.length === 0) {
-                messagesContainer.innerHTML = '<div class="no-messages">Post-it notes will appear here...</div>';
-                return;
-            }
-
-            messagesContainer.innerHTML = messages.map(msg => `
-                <div class="post-it ${msg.color}">
-                    <div class="post-it-to">To ${msg.to}</div>
-                    <div class="post-it-content">${msg.content.replace(/\n/g, '<br>')}</div>
-                    <div class="post-it-date">${msg.timestamp}</div>
-                </div>
-            `).join('');
         }
 
-        // Add sample messages for demonstration
-        setTimeout(() => {
-            const sampleMessages = [
-                {
-                    id: 1,
-                    to: "Grandma",
-                    content: "I miss your cookies and bedtime stories. I think about you every night before I sleep. Thank you for all the love.",
-                    color: "yellow",
-                    timestamp: "Sep 20"
-                },
-                {
-                    id: 2,
-                    to: "Charlie",
-                    content: "You were the best dog anyone could ask for. I'm sorry I couldn't save you. Run free at the rainbow bridge. 🐕",
-                    color: "blue",
-                    timestamp: "Sep 18"
-                },
-                {
-                    id: 3,
-                    to: "My friend Alex",
-                    content: "I wish we hadn't fought. I miss our late-night talks and terrible jokes. You meant the world to me.",
-                    color: "pink",
-                    timestamp: "Sep 15"
-                },
-                {
-                    id: 4,
-                    to: "Dad",
-                    content: "I finally got that promotion you always believed I'd get. I wore your lucky tie to the interview. Miss you every day.",
-                    color: "green",
-                    timestamp: "Sep 12"
-                },
-                {
-                    id: 5,
-                    to: "Little sister",
-                    content: "I should have been a better big brother. I'm sorry for all the times I was mean. I love you so much.",
-                    color: "orange",
-                    timestamp: "Sep 10"
-                }
-            ];
-
-            messages = [...sampleMessages, ...messages];
-            renderMessages();
-        }, 1500);
+        // Load messages when page loads
+        loadMessages();
 
         // Add shake animation keyframes dynamically
         const style = document.createElement('style');
