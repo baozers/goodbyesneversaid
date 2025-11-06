@@ -25,7 +25,6 @@
             position: relative;
         }
 
-        /* Paper texture overlay */
         body::before {
             content: '';
             position: fixed;
@@ -215,6 +214,91 @@
             box-shadow: 0 6px 12px rgba(123, 155, 209, 0.4);
         }
 
+        .privacy-notice {
+            background: #fff9e6;
+            border: 2px dashed #dda0dd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+            transform: rotate(-0.3deg);
+        }
+
+        .privacy-notice p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .instagram-banner {
+            background: linear-gradient(135deg, #f5f3f0 0%, #fff 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 50px auto;
+            max-width: 600px;
+            box-shadow: 
+                0 6px 16px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.9);
+            border: 2px solid #e0e0e0;
+            transform: rotate(0.5deg);
+            position: relative;
+        }
+
+        .instagram-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .instagram-icon {
+            font-size: 2.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .instagram-text {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .instagram-text strong {
+            display: block;
+            font-family: 'Caveat', cursive;
+            font-size: 1.8rem;
+            color: #2c2c2c;
+            margin-bottom: 5px;
+        }
+
+        .instagram-text p {
+            margin: 0;
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .instagram-btn {
+            background: linear-gradient(135deg, #ff8a95 0%, #ff7a8a 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-family: 'Caveat', cursive;
+            font-size: 1.3rem;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(255, 122, 138, 0.3);
+            transition: all 0.3s ease;
+            display: inline-block;
+            transform: rotate(-1deg);
+        }
+
+        .instagram-btn:hover {
+            background: linear-gradient(135deg, #ff7a8a 0%, #ff6b7b 100%);
+            transform: rotate(-1deg) translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 122, 138, 0.4);
+        }
+
         .messages-wall {
             margin-top: 60px;
             position: relative;
@@ -344,7 +428,6 @@
             transform: rotate(-1deg);
         }
 
-        /* Scattered elements */
         .scattered-element {
             position: absolute;
             pointer-events: none;
@@ -379,6 +462,20 @@
                 margin: 20px 10px;
             }
 
+            .instagram-banner {
+                padding: 20px;
+                margin: 30px 10px;
+            }
+
+            .instagram-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .instagram-text {
+                min-width: auto;
+            }
+
             .post-it {
                 width: 180px;
                 min-height: 180px;
@@ -400,7 +497,6 @@
     </style>
 </head>
 <body>
-    <!-- Scattered decorative elements -->
     <div class="scattered-element heart-doodle" style="top: 15%; left: 10%;">💕</div>
     <div class="scattered-element star-doodle" style="top: 25%; right: 15%;">⭐</div>
     <div class="scattered-element heart-doodle" style="top: 60%; left: 5%;">💫</div>
@@ -439,8 +535,23 @@
                     </div>
                 </div>
 
+                <div class="privacy-notice">
+                    <p>💌 Your message is anonymous, but may be shared publicly on our social media to spread love and healing. By posting, you agree to this.</p>
+                </div>
+
                 <button type="submit" class="submit-btn">Add to Wall</button>
             </form>
+        </div>
+
+        <div class="instagram-banner">
+            <div class="instagram-content">
+                <span class="instagram-icon">📸</span>
+                <div class="instagram-text">
+                    <strong>Follow us on Instagram!</strong>
+                    <p>Your note might be featured ✨</p>
+                </div>
+                <a href="https://instagram.com/goodbyes.neversaid" target="_blank" class="instagram-btn">@goodbyes.neversaid</a>
+            </div>
         </div>
 
         <div class="messages-wall">
@@ -452,42 +563,32 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js"></script>
     <script>
-        // 🔥 REPLACE THESE WITH YOUR SUPABASE DETAILS
         const SUPABASE_URL = 'https://vnsgnumlskjrcyvmxcxo.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZuc2dudW1sc2tqcmN5dm14Y3hvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NDkyNjksImV4cCI6MjA3NDUyNTI2OX0.nt1V7CH8sgiFklR4WGFI_nZbSIAtdW7uxSDtdes39v0';
         
-        // Initialize Supabase client
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Post-it colors
         const colors = ['yellow', 'pink', 'blue', 'green', 'orange', 'purple', 'lime', 'coral'];
-        let selectedColor = 'yellow'; // Default selected color
+        let selectedColor = 'yellow';
 
-        // DOM elements
         const form = document.getElementById('messageForm');
         const messagesContainer = document.getElementById('messagesContainer');
         const colorOptions = document.querySelectorAll('.color-option');
 
-        // Color selection handler
         colorOptions.forEach(option => {
             option.addEventListener('click', () => {
-                // Remove selected class from all options
                 colorOptions.forEach(opt => opt.classList.remove('selected'));
-                // Add selected class to clicked option
                 option.classList.add('selected');
-                // Update selected color
                 selectedColor = option.dataset.color;
             });
         });
 
-        // Show error messages
         function showError(message) {
             console.error('Error:', message);
             alert('Something went wrong: ' + message);
         }
 
-        // Load messages from database
         async function loadMessages() {
             try {
                 console.log('🔄 Loading messages...');
@@ -517,7 +618,6 @@
             }
         }
 
-        // Form submission
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -528,16 +628,15 @@
             if (!recipient || !messageText) return;
 
             try {
-                // Disable submit button
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Sending...';
 
                 const { data, error } = await supabase
                     .from('messages')
                     .insert([{
-                        recipient: recipient || null, // Let database handle default
+                        recipient: recipient || null,
                         content: messageText,
-                        color: selectedColor // Use the selected color instead of random
+                        color: selectedColor
                     }]);
 
                 if (error) {
@@ -545,22 +644,19 @@
                 }
 
                 form.reset();
-                // Reset color selection to yellow (first option)
                 colorOptions.forEach(opt => opt.classList.remove('selected'));
                 colorOptions[0].classList.add('selected');
                 selectedColor = 'yellow';
-                loadMessages(); // Refresh messages
+                loadMessages();
 
             } catch (error) {
                 showError('Failed to send message: ' + error.message);
             } finally {
-                // Re-enable submit button
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Add to Wall';
             }
         });
 
-        // Render messages
         function renderMessages(messages) {
             if (messages.length === 0) {
                 messagesContainer.innerHTML = '<div class="no-messages">No messages yet. Be the first to share!</div>';
@@ -574,7 +670,6 @@
                 </div>
             `).join('');
 
-            // Add shake animation to newest post-it
             setTimeout(() => {
                 const newPostIt = messagesContainer.querySelector('.post-it:first-child');
                 if (newPostIt) {
@@ -583,10 +678,8 @@
             }, 100);
         }
 
-        // Load messages when page loads
         loadMessages();
 
-        // Add shake animation keyframes dynamically
         const style = document.createElement('style');
         style.textContent = `
             @keyframes shake {
