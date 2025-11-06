@@ -614,7 +614,7 @@
 
                 <div class="form-group">
                     <label for="recipient">To:</label>
-                    <input type="text" id="recipient" placeholder="Mom, Dad, Sarah, my best friend..." required>
+                    <input type="text" id="recipient" placeholder="Mom, Dad, Sarah, my best friend...">
                 </div>
 
                 <div class="form-group">
@@ -726,7 +726,7 @@
             const messageText = document.getElementById('message').value.trim();
             const submitBtn = form.querySelector('button');
 
-            if (!recipient || !messageText) return;
+            if (!messageText) return;
 
             try {
                 submitBtn.disabled = true;
@@ -735,7 +735,7 @@
                 const { data, error } = await supabase
                     .from('messages')
                     .insert([{
-                        recipient: recipient || null,
+                        recipient: recipient || '?',
                         content: messageText,
                         color: selectedColor
                     }]);
