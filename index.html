@@ -231,61 +231,133 @@
             line-height: 1.5;
         }
 
-        .instagram-banner {
-            background: linear-gradient(135deg, #f5f3f0 0%, #fff 100%);
-            border-radius: 12px;
-            padding: 30px;
-            margin: 50px auto;
-            max-width: 600px;
-            box-shadow: 
-                0 6px 16px rgba(0,0,0,0.1),
-                inset 0 1px 0 rgba(255,255,255,0.9);
-            border: 2px solid #e0e0e0;
-            transform: rotate(0.5deg);
-            position: relative;
-        }
-
-        .instagram-content {
+        /* Fixed Instagram Badge */
+        .instagram-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ff8a95 0%, #ff7a8a 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            box-shadow: 0 4px 12px rgba(255, 122, 138, 0.4);
+            z-index: 1000;
+            transform: rotate(-2deg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
+            gap: 8px;
+            font-family: 'Caveat', cursive;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
 
-        .instagram-icon {
-            font-size: 2.5rem;
+        .instagram-badge:hover {
+            transform: rotate(-2deg) translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 122, 138, 0.5);
+        }
+
+        .instagram-badge .icon {
+            font-size: 1.3rem;
             animation: float 3s ease-in-out infinite;
         }
 
-        .instagram-text {
-            flex: 1;
-            min-width: 200px;
+        /* Success Popup Modal */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .popup-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8) rotate(-5deg); opacity: 0; }
+            50% { transform: scale(1.05) rotate(2deg); }
+            100% { transform: scale(1) rotate(-1deg); opacity: 1; }
+        }
+
+        .popup-content {
+            background: #fff;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
             text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            transform: rotate(-1deg);
+            animation: popIn 0.5s ease;
         }
 
-        .instagram-text strong {
-            display: block;
+        .popup-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            transition: all 0.3s ease;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .popup-close:hover {
+            color: #333;
+            transform: rotate(90deg);
+        }
+
+        .popup-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .popup-title {
             font-family: 'Caveat', cursive;
-            font-size: 1.8rem;
+            font-size: 2.5rem;
             color: #2c2c2c;
-            margin-bottom: 5px;
+            margin-bottom: 15px;
+            transform: rotate(1deg);
         }
 
-        .instagram-text p {
-            margin: 0;
-            font-size: 1rem;
+        .popup-message {
+            font-size: 1.1rem;
             color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
         }
 
-        .instagram-btn {
+        .popup-instagram-btn {
             background: linear-gradient(135deg, #ff8a95 0%, #ff7a8a 100%);
             color: white;
             text-decoration: none;
-            padding: 12px 25px;
+            padding: 15px 30px;
             border-radius: 25px;
             font-family: 'Caveat', cursive;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: 600;
             box-shadow: 0 4px 8px rgba(255, 122, 138, 0.3);
             transition: all 0.3s ease;
@@ -293,7 +365,7 @@
             transform: rotate(-1deg);
         }
 
-        .instagram-btn:hover {
+        .popup-instagram-btn:hover {
             background: linear-gradient(135deg, #ff7a8a 0%, #ff6b7b 100%);
             transform: rotate(-1deg) translateY(-2px);
             box-shadow: 0 6px 12px rgba(255, 122, 138, 0.4);
@@ -462,18 +534,23 @@
                 margin: 20px 10px;
             }
 
-            .instagram-banner {
-                padding: 20px;
-                margin: 30px 10px;
+            .instagram-badge {
+                top: 10px;
+                right: 10px;
+                padding: 10px 15px;
+                font-size: 1rem;
             }
 
-            .instagram-content {
-                flex-direction: column;
-                text-align: center;
+            .instagram-badge .icon {
+                font-size: 1.1rem;
             }
 
-            .instagram-text {
-                min-width: auto;
+            .popup-content {
+                padding: 30px 20px;
+            }
+
+            .popup-title {
+                font-size: 2rem;
             }
 
             .post-it {
@@ -488,6 +565,18 @@
         }
 
         @media (max-width: 480px) {
+            .instagram-badge span:not(.icon) {
+                display: none;
+            }
+
+            .instagram-badge {
+                padding: 10px;
+                border-radius: 50%;
+                width: 45px;
+                height: 45px;
+                justify-content: center;
+            }
+
             .post-it {
                 width: 160px;
                 min-height: 160px;
@@ -502,6 +591,23 @@
     <div class="scattered-element heart-doodle" style="top: 60%; left: 5%;">💫</div>
     <div class="scattered-element star-doodle" style="bottom: 20%; right: 8%;">✨</div>
     <div class="scattered-element heart-doodle" style="bottom: 40%; left: 12%;">🌸</div>
+
+    <!-- Fixed Instagram Badge -->
+    <a href="https://instagram.com/goodbyes.neversaid" target="_blank" class="instagram-badge">
+        <span class="icon">📸</span>
+        <span>Follow Us!</span>
+    </a>
+
+    <!-- Success Popup -->
+    <div class="popup-overlay" id="successPopup">
+        <div class="popup-content">
+            <button class="popup-close" id="closePopup">×</button>
+            <div class="popup-icon">✨</div>
+            <h2 class="popup-title">Message Posted!</h2>
+            <p class="popup-message">Your heartfelt words have been added to the wall. Follow us on Instagram — your note might be featured!</p>
+            <a href="https://instagram.com/goodbyes.neversaid" target="_blank" class="popup-instagram-btn">@goodbyes.neversaid</a>
+        </div>
+    </div>
 
     <div class="container">
         <header>
@@ -543,17 +649,6 @@
             </form>
         </div>
 
-        <div class="instagram-banner">
-            <div class="instagram-content">
-                <span class="instagram-icon">📸</span>
-                <div class="instagram-text">
-                    <strong>Follow us on Instagram!</strong>
-                    <p>Your note might be featured ✨</p>
-                </div>
-                <a href="https://instagram.com/goodbyes.neversaid" target="_blank" class="instagram-btn">@goodbyes.neversaid</a>
-            </div>
-        </div>
-
         <div class="messages-wall">
             <div class="messages-grid" id="messagesContainer">
                 <div class="no-messages">Post-it notes will appear here...</div>
@@ -575,13 +670,32 @@
         const form = document.getElementById('messageForm');
         const messagesContainer = document.getElementById('messagesContainer');
         const colorOptions = document.querySelectorAll('.color-option');
+        const successPopup = document.getElementById('successPopup');
+        const closePopup = document.getElementById('closePopup');
 
+        // Color selection
         colorOptions.forEach(option => {
             option.addEventListener('click', () => {
                 colorOptions.forEach(opt => opt.classList.remove('selected'));
                 option.classList.add('selected');
                 selectedColor = option.dataset.color;
             });
+        });
+
+        // Popup controls
+        function showPopup() {
+            successPopup.classList.add('show');
+        }
+
+        function hidePopup() {
+            successPopup.classList.remove('show');
+        }
+
+        closePopup.addEventListener('click', hidePopup);
+        successPopup.addEventListener('click', (e) => {
+            if (e.target === successPopup) {
+                hidePopup();
+            }
         });
 
         function showError(message) {
@@ -592,8 +706,6 @@
         async function loadMessages() {
             try {
                 console.log('🔄 Loading messages...');
-                console.log('🔗 Supabase URL:', SUPABASE_URL);
-                console.log('🔑 Supabase Key (first 20 chars):', SUPABASE_ANON_KEY.substring(0, 20) + '...');
                 
                 messagesContainer.innerHTML = '<div class="no-messages">Loading messages...</div>';
                 
@@ -601,8 +713,6 @@
                     .from('messages')
                     .select('*')
                     .order('id', { ascending: false });
-
-                console.log('📥 Raw response:', { data: messages, error });
 
                 if (error) {
                     console.error('❌ Database error:', error);
@@ -647,6 +757,10 @@
                 colorOptions.forEach(opt => opt.classList.remove('selected'));
                 colorOptions[0].classList.add('selected');
                 selectedColor = 'yellow';
+                
+                // Show success popup
+                showPopup();
+                
                 loadMessages();
 
             } catch (error) {
