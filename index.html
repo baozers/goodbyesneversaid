@@ -88,17 +88,22 @@
         .story-link {
             display: inline-block;
             font-family: 'Caveat', cursive;
-            font-size: 1.1rem;
-            color: #7b9bd1;
+            font-size: 1.2rem;
+            color: white;
+            background: #2196F3;
             text-decoration: none;
-            margin-top: 8px;
+            margin-top: 15px;
+            padding: 10px 25px;
+            border-radius: 25px;
             transition: all 0.3s ease;
             transform: rotate(-0.5deg);
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
         }
 
         .story-link:hover {
-            color: #6a8bc4;
-            transform: rotate(-0.5deg) translateX(3px);
+            background: #1976D2;
+            transform: rotate(-0.5deg) translateY(-2px);
+            box-shadow: 0 6px 12px rgba(33, 150, 243, 0.4);
         }
 
         .form-container {
@@ -819,13 +824,3 @@
 
         const style = document.createElement('style');
         style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: rotate(var(--rotation, 0deg)) translateX(0); }
-                25% { transform: rotate(var(--rotation, 0deg)) translateX(-2px); }
-                75% { transform: rotate(var(--rotation, 0deg)) translateX(2px); }
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
-</body>
-</html>
