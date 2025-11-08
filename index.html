@@ -395,6 +395,82 @@
             box-shadow: 0 6px 12px rgba(255, 122, 138, 0.4);
         }
 
+        .warning-popup .popup-content {
+            background: #fff8e1;
+            border-left: 5px solid #ff9800;
+        }
+
+        .warning-popup .popup-icon {
+            color: #ff9800;
+        }
+
+        .warning-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .warning-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-family: 'Caveat', cursive;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .warning-btn.cancel {
+            background: #e0e0e0;
+            color: #555;
+        }
+
+        .warning-btn.cancel:hover {
+            background: #d0d0d0;
+        }
+
+        .warning-btn.continue {
+            background: #7b9bd1;
+            color: white;
+        }
+
+        .warning-btn.continue:hover {
+            background: #6a8bc4;
+        }
+
+        .resources-section {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .resources-section h3 {
+            font-family: 'Caveat', cursive;
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            color: #2c2c2c;
+        }
+
+        .resources-section p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .resources-section a {
+            color: #2196F3;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .resources-section a:hover {
+            text-decoration: underline;
+        }
+
         .messages-wall {
             margin-top: 60px;
             position: relative;
@@ -577,6 +653,27 @@
         </div>
     </div>
 
+    <div class="popup-overlay warning-popup" id="warningPopup">
+        <div class="popup-content">
+            <button class="popup-close" id="closeWarning">×</button>
+            <div class="popup-icon">⚠️</div>
+            <h2 class="popup-title">We're Here for You</h2>
+            <p class="popup-message">We noticed your message may contain words that concern us about your wellbeing. You're not alone, and there are people who want to help.</p>
+            <div class="resources-section">
+                <h3>Crisis Resources</h3>
+                <p><strong>Call or Text 988</strong> - Suicide & Crisis Lifeline (24/7)</p>
+                <p><strong>Text "HELLO" to 741741</strong> - Crisis Text Line</p>
+                <p><strong>1-800-273-8255</strong> - National Suicide Prevention Lifeline</p>
+                <p><a href="https://www.befrienders.org" target="_blank">International Support</a> - Find resources in your country</p>
+            </div>
+            <p class="popup-message" style="margin-top: 15px; font-size: 0.95rem;">Would you still like to post your message?</p>
+            <div class="warning-buttons">
+                <button class="warning-btn cancel" id="cancelPost">Get Help Instead</button>
+                <button class="warning-btn continue" id="continuePost">Continue Posting</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <header>
             <h1>Goodbyes Never Said</h1>
@@ -634,12 +731,80 @@
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let selectedColor = 'yellow';
+        let pendingMessage = null;
 
         const form = document.getElementById('messageForm');
         const messagesContainer = document.getElementById('messagesContainer');
         const colorOptions = document.querySelectorAll('.color-option');
         const successPopup = document.getElementById('successPopup');
         const closePopup = document.getElementById('closePopup');
+        const warningPopup = document.getElementById('warningPopup');
+        const closeWarning = document.getElementById('closeWarning');
+        const cancelPost = document.getElementById('cancelPost');
+        const continuePost = document.getElementById('continuePost');
+
+        // Content filtering keywords
+        const selfHarmKeywords = [
+            'kill myself', 'kill my self', 'end my life', 'suicide', 'suicidal',
+            'want to die', 'wanna die', 'better off dead', 'end it all',
+            'no reason to live', 'cant go on', "can't go on", 'hurt myself',
+            'harm myself', 'cut myself', 'overdose', 'end things'
+        ];
+
+        const excessiveProfanity = [
+            'fucking bitch', 'fucking cunt', 'fucking whore', 'fucking slut',
+            'stupid bitch', 'dumb bitch', 'piece of shit', 'worthless piece',
+            'go to hell', 'rot in hell', 'fuck you', 'screw you'
+        ];
+
+        function detectNonsense(text) {
+            // Check for very short messages
+            if (text.trim().length < 10) return true;
+            
+            // Check for repeated characters (ggggggg, aaaaaaa, etc)
+            if (/(.)\1{5,}/.test(text)) return true;
+            
+            // Check for keyboard spam (asdf, qwerty, etc)
+            const spamPatterns = ['asdf', 'qwer', 'zxcv', 'hjkl', 'test test', 'blah blah'];
+            const lowerText = text.toLowerCase();
+            if (spamPatterns.some(pattern => lowerText.includes(pattern))) return true;
+            
+            // Check if mostly numbers or special characters
+            const alphaCount = (text.match(/[a-zA-Z]/g) || []).length;
+            if (alphaCount < text.length * 0.5) return true;
+            
+            return false;
+        }
+
+        function detectSelfHarm(text) {
+            const lowerText = text.toLowerCase();
+            return selfHarmKeywords.some(keyword => lowerText.includes(keyword));
+        }
+
+        function detectExcessiveProfanity(text) {
+            const lowerText = text.toLowerCase();
+            // Count offensive phrases
+            let offensiveCount = 0;
+            excessiveProfanity.forEach(phrase => {
+                if (lowerText.includes(phrase)) offensiveCount++;
+            });
+            
+            // Allow some profanity as intensifiers, but not excessive
+            return offensiveCount >= 2;
+        }
+
+        function validateContent(text) {
+            if (detectNonsense(text)) {
+                return { valid: false, reason: 'nonsense' };
+            }
+            if (detectExcessiveProfanity(text)) {
+                return { valid: false, reason: 'profanity' };
+            }
+            if (detectSelfHarm(text)) {
+                return { valid: false, reason: 'selfharm' };
+            }
+            return { valid: true };
+        }
 
         colorOptions.forEach(option => {
             option.addEventListener('click', () => {
@@ -657,9 +822,103 @@
             successPopup.classList.remove('show');
         }
 
+        function showWarning() {
+            warningPopup.classList.add('show');
+        }
+
+        function hideWarning() {
+            warningPopup.classList.remove('show');
+        }
+
         closePopup.addEventListener('click', hidePopup);
         successPopup.addEventListener('click', (e) => {
             if (e.target === successPopup) hidePopup();
+        });
+
+        closeWarning.addEventListener('click', hideWarning);
+        warningPopup.addEventListener('click', (e) => {
+            if (e.target === warningPopup) hideWarning();
+        });
+
+        cancelPost.addEventListener('click', () => {
+            hideWarning();
+            pendingMessage = null;
+        });
+
+        continuePost.addEventListener('click', async () => {
+            hideWarning();
+            if (pendingMessage) {
+                await submitMessage(pendingMessage);
+                pendingMessage = null;
+            }
+        });
+
+        async function submitMessage(messageData) {
+            const submitBtn = form.querySelector('button');
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sending...';
+
+                const { error } = await supabase
+                    .from('messages')
+                    .insert([messageData]);
+
+                if (error) throw error;
+
+                form.reset();
+                colorOptions.forEach(opt => opt.classList.remove('selected'));
+                colorOptions[0].classList.add('selected');
+                selectedColor = 'yellow';
+                
+                showPopup();
+                loadMessages();
+
+            } catch (error) {
+                alert('Failed to send: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add to Wall';
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const recipient = document.getElementById('recipient').value.trim();
+            const messageText = document.getElementById('message').value.trim();
+
+            if (!messageText) return;
+
+            // Validate content
+            const validation = validateContent(messageText);
+            
+            if (!validation.valid) {
+                if (validation.reason === 'nonsense') {
+                    alert('Please share a meaningful message. Random text or very short messages are not allowed.');
+                    return;
+                }
+                if (validation.reason === 'profanity') {
+                    alert('Your message contains excessive profanity. Please rephrase your message more respectfully.');
+                    return;
+                }
+                if (validation.reason === 'selfharm') {
+                    // Show warning popup for self-harm
+                    pendingMessage = {
+                        recipient: recipient || '?',
+                        content: messageText,
+                        color: selectedColor
+                    };
+                    showWarning();
+                    return;
+                }
+            }
+
+            // If validation passes, submit directly
+            await submitMessage({
+                recipient: recipient || '?',
+                content: messageText,
+                color: selectedColor
+            });
         });
 
         async function loadMessages() {
@@ -679,45 +938,6 @@
                 messagesContainer.innerHTML = '<div class="no-messages">Failed to load messages</div>';
             }
         }
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const recipient = document.getElementById('recipient').value.trim();
-            const messageText = document.getElementById('message').value.trim();
-            const submitBtn = form.querySelector('button');
-
-            if (!messageText) return;
-
-            try {
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Sending...';
-
-                const { error } = await supabase
-                    .from('messages')
-                    .insert([{
-                        recipient: recipient || '?',
-                        content: messageText,
-                        color: selectedColor
-                    }]);
-
-                if (error) throw error;
-
-                form.reset();
-                colorOptions.forEach(opt => opt.classList.remove('selected'));
-                colorOptions[0].classList.add('selected');
-                selectedColor = 'yellow';
-                
-                showPopup();
-                loadMessages();
-
-            } catch (error) {
-                alert('Failed to send: ' + error.message);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Add to Wall';
-            }
-        });
 
         function renderMessages(messages) {
             if (messages.length === 0) {
