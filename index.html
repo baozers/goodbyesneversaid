@@ -243,7 +243,6 @@
             text-align: center;
         }
 
-        /* Fixed Instagram Badge */
         .instagram-badge {
             position: fixed;
             top: 20px;
@@ -276,7 +275,6 @@
             animation: float 3s ease-in-out infinite;
         }
 
-        /* Success Popup Modal */
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -402,15 +400,6 @@
             position: relative;
         }
 
-        .wall-title {
-            text-align: center;
-            font-family: 'Caveat', cursive;
-            font-size: 2.5rem;
-            color: #555;
-            margin-bottom: 40px;
-            transform: rotate(-1deg);
-        }
-
         .messages-grid {
             display: flex;
             flex-wrap: wrap;
@@ -508,15 +497,6 @@
             margin-bottom: 15px;
         }
 
-        .post-it-date {
-            position: absolute;
-            bottom: 8px;
-            right: 12px;
-            font-size: 0.7rem;
-            opacity: 0.7;
-            font-family: 'Kalam', cursive;
-        }
-
         .no-messages {
             text-align: center;
             color: #888;
@@ -550,64 +530,27 @@
             50% { transform: translateY(-10px) rotate(5deg); }
         }
 
+        @keyframes shake {
+            0%, 100% { transform: var(--rotation) translateX(0); }
+            25% { transform: var(--rotation) translateX(-2px); }
+            75% { transform: var(--rotation) translateX(2px); }
+        }
+
         @media (max-width: 768px) {
-            h1 {
-                font-size: 3rem;
-            }
-
-            .form-container {
-                padding: 30px 20px;
-                margin: 20px 10px;
-            }
-
-            .instagram-badge {
-                top: 10px;
-                right: 10px;
-                padding: 10px 15px;
-                font-size: 1rem;
-            }
-
-            .instagram-badge .icon {
-                font-size: 1.1rem;
-            }
-
-            .popup-content {
-                padding: 30px 20px;
-            }
-
-            .popup-title {
-                font-size: 2rem;
-            }
-
-            .post-it {
-                width: 180px;
-                min-height: 180px;
-                padding: 18px 12px 12px 12px;
-            }
-
-            .messages-grid {
-                gap: 15px;
-            }
+            h1 { font-size: 3rem; }
+            .form-container { padding: 30px 20px; margin: 20px 10px; }
+            .instagram-badge { top: 10px; right: 10px; padding: 10px 15px; font-size: 1rem; }
+            .instagram-badge .icon { font-size: 1.1rem; }
+            .popup-content { padding: 30px 20px; }
+            .popup-title { font-size: 2rem; }
+            .post-it { width: 180px; min-height: 180px; padding: 18px 12px 12px 12px; }
+            .messages-grid { gap: 15px; }
         }
 
         @media (max-width: 480px) {
-            .instagram-badge span:not(.icon) {
-                display: none;
-            }
-
-            .instagram-badge {
-                padding: 10px;
-                border-radius: 50%;
-                width: 45px;
-                height: 45px;
-                justify-content: center;
-            }
-
-            .post-it {
-                width: 160px;
-                min-height: 160px;
-                font-size: 0.85rem;
-            }
+            .instagram-badge span:not(.icon) { display: none; }
+            .instagram-badge { padding: 10px; border-radius: 50%; width: 45px; height: 45px; justify-content: center; }
+            .post-it { width: 160px; min-height: 160px; font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -618,13 +561,11 @@
     <div class="scattered-element star-doodle" style="bottom: 20%; right: 8%;">✨</div>
     <div class="scattered-element heart-doodle" style="bottom: 40%; left: 12%;">🌸</div>
 
-    <!-- Fixed Instagram Badge -->
     <a href="https://instagram.com/goodbyes.neversaid" target="_blank" class="instagram-badge">
         <span class="icon">📸</span>
         <span>Follow Us!</span>
     </a>
 
-    <!-- Success Popup -->
     <div class="popup-overlay" id="successPopup">
         <div class="popup-content">
             <button class="popup-close" id="closePopup">×</button>
@@ -692,7 +633,6 @@
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const colors = ['yellow', 'pink', 'blue', 'green', 'orange', 'purple', 'lime', 'coral'];
         let selectedColor = 'yellow';
 
         const form = document.getElementById('messageForm');
@@ -701,7 +641,6 @@
         const successPopup = document.getElementById('successPopup');
         const closePopup = document.getElementById('closePopup');
 
-        // Color selection
         colorOptions.forEach(option => {
             option.addEventListener('click', () => {
                 colorOptions.forEach(opt => opt.classList.remove('selected'));
@@ -710,7 +649,6 @@
             });
         });
 
-        // Popup controls
         function showPopup() {
             successPopup.classList.add('show');
         }
@@ -721,20 +659,11 @@
 
         closePopup.addEventListener('click', hidePopup);
         successPopup.addEventListener('click', (e) => {
-            if (e.target === successPopup) {
-                hidePopup();
-            }
+            if (e.target === successPopup) hidePopup();
         });
-
-        function showError(message) {
-            console.error('Error:', message);
-            alert('Something went wrong: ' + message);
-        }
 
         async function loadMessages() {
             try {
-                console.log('🔄 Loading messages...');
-                
                 messagesContainer.innerHTML = '<div class="no-messages">Loading messages...</div>';
                 
                 const { data: messages, error } = await supabase
@@ -742,17 +671,12 @@
                     .select('*')
                     .order('id', { ascending: false });
 
-                if (error) {
-                    console.error('❌ Database error:', error);
-                    throw error;
-                }
+                if (error) throw error;
 
-                console.log('✅ Successfully loaded', messages?.length || 0, 'messages');
                 renderMessages(messages || []);
             } catch (error) {
-                console.error('💥 Load messages failed:', error);
-                showError('Failed to load messages: ' + error.message);
-                messagesContainer.innerHTML = '<div class="no-messages">Failed to load messages. Check console for details.</div>';
+                console.error('Load error:', error);
+                messagesContainer.innerHTML = '<div class="no-messages">Failed to load messages</div>';
             }
         }
 
@@ -769,7 +693,7 @@
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Sending...';
 
-                const { data, error } = await supabase
+                const { error } = await supabase
                     .from('messages')
                     .insert([{
                         recipient: recipient || '?',
@@ -777,22 +701,18 @@
                         color: selectedColor
                     }]);
 
-                if (error) {
-                    throw error;
-                }
+                if (error) throw error;
 
                 form.reset();
                 colorOptions.forEach(opt => opt.classList.remove('selected'));
                 colorOptions[0].classList.add('selected');
                 selectedColor = 'yellow';
                 
-                // Show success popup
                 showPopup();
-                
                 loadMessages();
 
             } catch (error) {
-                showError('Failed to send message: ' + error.message);
+                alert('Failed to send: ' + error.message);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Add to Wall';
@@ -811,16 +731,9 @@
                     <div class="post-it-content">${msg.content.replace(/\n/g, '<br>')}</div>
                 </div>
             `).join('');
-
-            setTimeout(() => {
-                const newPostIt = messagesContainer.querySelector('.post-it:first-child');
-                if (newPostIt) {
-                    newPostIt.style.animation = 'shake 0.5s ease-in-out';
-                }
-            }, 100);
         }
 
         loadMessages();
-
-        const style = document.createElement('style');
-        style.textContent = `
+    </script>
+</body>
+</html>
