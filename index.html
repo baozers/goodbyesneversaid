@@ -748,18 +748,18 @@
             'kill myself', 'kill my self', 'end my life', 'suicide', 'suicidal',
             'want to die', 'wanna die', 'better off dead', 'end it all',
             'no reason to live', 'cant go on', "can't go on", 'hurt myself',
-            'harm myself', 'cut myself', 'overdose', 'end things'
+            'harm myself', 'cut myself', 'overdose', 'end things', 'kms', 'let me die', 
         ];
 
         const excessiveProfanity = [
             'fucking bitch', 'fucking cunt', 'fucking whore', 'fucking slut',
             'stupid bitch', 'dumb bitch', 'piece of shit', 'worthless piece',
-            'go to hell', 'rot in hell', 'fuck you', 'screw you'
+            'go to hell', 'rot in hell', 'fuck you', 'screw you', 'cum', 'cunt', 'bitch', 'porn', 'pornography', 'fuck you', 'whore'
         ];
 
         function detectNonsense(text) {
             // Check for very short messages
-            if (text.trim().length < 10) return true;
+            if (text.trim().length < 7) return true;
             
             // Check for repeated characters (ggggggg, aaaaaaa, etc)
             if (/(.)\1{5,}/.test(text)) return true;
@@ -894,11 +894,11 @@
             
             if (!validation.valid) {
                 if (validation.reason === 'nonsense') {
-                    alert('Please share a meaningful message. Random text or very short messages are not allowed.');
+                    alert('Please keep messages appropriate. Random text or very short messages are not allowed.');
                     return;
                 }
                 if (validation.reason === 'profanity') {
-                    alert('Your message contains excessive profanity. Please rephrase your message more respectfully.');
+                    alert('Your message may contain excessive profanity. To keep this space safe for all, please edit before posting.');
                     return;
                 }
                 if (validation.reason === 'selfharm') {
